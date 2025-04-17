@@ -1,0 +1,19 @@
+<div class="bg-gray-800 text-white p-4 mt-8">
+    <div class="container">
+        <p class="text-center">© Year JustStreamIt - La vidéo à la demande</p>
+    </div>
+</div>
+
+<script>
+    // Footer component JavaScript
+    (function() {
+        console.log('Footer component loaded');
+        
+        // Update copyright year dynamically
+        const currentYear = new Date().getFullYear();
+        const copyrightElement = document.querySelector('.text-center');
+        if (copyrightElement) {
+            copyrightElement.textContent = copyrightElement.textContent.replace('Year', currentYear);
+        }
+    })();
+</script> 
