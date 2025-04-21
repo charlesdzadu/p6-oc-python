@@ -44,6 +44,7 @@ function humanReadableNumber(number) {
 async function getMoviesByGenres(genreName) {
     var queryParams = new URLSearchParams();
     queryParams.append('genre', genreName);
+    queryParams.append('page_size', 8);
     const response = await fetch(`${API_BASE_URL}/titles?${queryParams.toString()}`);
     const data = await response.json();
     return data;
@@ -240,94 +241,182 @@ async function displayMostRatedMovies() {
         // Clear existing content
         container.innerHTML = '';
         
-        // Default image for fallback
-        const defaultImageUrl = 'https://placehold.co/150x100/gray/white?text=No+Image';
+        // Determine initial number of movies to show based on screen width
+        const isMobile = window.innerWidth < 768;
+        const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+        const initialMoviesToShow = isMobile ? 2 : (isTablet ? 4 : 8);
         
-        // Display movies (limit to 4 for desktop on initial load)
-        const moviesToShow = window.innerWidth >= 1024 ? 8 : (window.innerWidth >= 768 ? 2 : 1);
+        // Get the corresponding "Voir plus" button for this container
+        const voirPlusButton = container.parentElement.querySelector('button');
         
-        // Create movie cards
-        movies.slice(0, moviesToShow).forEach(movie => {
-            const movieCard = document.createElement('div');
-            movieCard.className = 'movie-card cursor-pointer';
-            movieCard.onclick = async function() {
-                await openModal(movie.id);
-            };
-            
-            movieCard.innerHTML = `
-                <img src="${movie.image_url || defaultImageUrl}" alt="${movie.title}" class="w-full h-40 md:h-48 lg:h-52 object-cover rounded-sm">
-                <div class="movie-overlay">
-                    <span class="movie-title">${movie.title}</span>
-                    <button class="movie-details-btn" onclick="openModal('${movie.id}'); event.stopPropagation();">Détails</button>
-                </div>
-            `;
-            
-            // Add error handling for the image
-            const imgElement = movieCard.querySelector('img');
-            imgElement.onerror = function() {
-                this.src = defaultImageUrl;
-            };
-            
-            container.appendChild(movieCard);
-        });
+        // Create and display initial movie cards
+        createMovieCards(movies.slice(0, initialMoviesToShow), container);
+        
+        // Set up the "Voir plus" button
+        if (voirPlusButton) {
+            if (movies.length > initialMoviesToShow && (isMobile || isTablet)) {
+                // Store remaining movies for later use
+                const remainingMovies = movies.slice(initialMoviesToShow);
+                let showingAll = false;
+                
+                // Add click handler to load more movies
+                voirPlusButton.onclick = function() {
+                    if (!showingAll) {
+                        // Add the remaining movies to the container
+                        createMovieCards(remainingMovies, container);
+                        
+                        // Update button text
+                        this.textContent = "Tout est affiché";
+                        this.classList.add("bg-gray-500");
+                        this.classList.remove("bg-red-600");
+                        showingAll = true;
+                    }
+                };
+                
+                // Make sure button is visible on mobile and tablet
+                voirPlusButton.style.display = "block";
+                voirPlusButton.textContent = "Voir plus";
+                voirPlusButton.classList.add("bg-red-600");
+                voirPlusButton.classList.remove("bg-gray-500");
+                
+                // Make sure it's visible on tablet
+                voirPlusButton.classList.remove("md:hidden");
+                // But hide on desktop
+                if (window.innerWidth >= 1024) {
+                    voirPlusButton.style.display = "none";
+                }
+            } else {
+                // If no more movies available, still show button but disabled
+                voirPlusButton.textContent = "Tout est affiché";
+                voirPlusButton.classList.add("bg-gray-500");
+                voirPlusButton.classList.remove("bg-red-600");
+                
+                // Make sure it's visible on tablet
+                voirPlusButton.classList.remove("md:hidden");
+                // But hide on desktop
+                if (window.innerWidth >= 1024) {
+                    voirPlusButton.style.display = "none";
+                } else {
+                    voirPlusButton.style.display = "block";
+                }
+            }
+        }
     } catch (error) {
         console.error('Error displaying most rated movies:', error);
     }
 }
 
+// Helper function to create movie cards
+function createMovieCards(movies, container) {
+    // Default image for fallback
+    const defaultImageUrl = 'https://placehold.co/150x100/gray/white?text=No+Image';
+    
+    // Create movie cards
+    movies.forEach(movie => {
+        const movieCard = document.createElement('div');
+        movieCard.className = 'movie-card cursor-pointer';
+        movieCard.onclick = async function() {
+            await openModal(movie.id);
+        };
+        
+        movieCard.innerHTML = `
+            <img src="${movie.image_url || defaultImageUrl}" alt="${movie.title}" class="w-full h-40 md:h-48 lg:h-52 object-cover rounded-sm">
+            <div class="movie-overlay">
+                <span class="movie-title">${movie.title}</span>
+                <button class="movie-details-btn" onclick="openModal('${movie.id}'); event.stopPropagation();">Détails</button>
+            </div>
+        `;
+        
+        // Add error handling for the image
+        const imgElement = movieCard.querySelector('img');
+        imgElement.onerror = function() {
+            this.src = defaultImageUrl;
+        };
+        
+        container.appendChild(movieCard);
+    });
+}
 
 async function displayMoviesByGenre(genreName, containerId) {
     try {
         const data = await getMoviesByGenres(genreName);
         const movies = data.results || [];
         
-        // Get the container for Mystery movies
+        // Get the container for movies
         const container = document.getElementById(containerId);
         
         if (!container) {
-            console.error('Mystery movies container not found');
+            console.error('Movies container not found: ' + containerId);
             return;
         }
         
         // Clear existing content
         container.innerHTML = '';
         
-        // Display movies (limit to 4 for desktop on initial load)
-        const moviesToShow = window.innerWidth >= 1024 ? 4 : (window.innerWidth >= 768 ? 2 : 1);
+        // Determine initial number of movies to show based on screen width
+        const isMobile = window.innerWidth < 768;
+        const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+        const initialMoviesToShow = isMobile ? 2 : (isTablet ? 4 : 8);
         
-        // Create movie cards
-        movies.slice(0, moviesToShow).forEach(movie => {
-            const movieCard = document.createElement('div');
-            movieCard.className = 'movie-card cursor-pointer';
-            movieCard.onclick = async function() {
-                await openModal(movie.id);
-            };
-            
-            // Set a default placeholder image
-            const defaultImageUrl = 'https://placehold.co/150x100/gray/white?text=No+Image';
-            
-            movieCard.innerHTML = `
-                <img src="${movie.image_url || defaultImageUrl}" alt="${movie.title}" class="w-full h-40 md:h-48 lg:h-52 object-cover rounded-sm">
-                <div class="movie-overlay">
-                    <span class="movie-title">${movie.title}</span>
-                    <button class="movie-details-btn" onclick="openModal('${movie.id}'); event.stopPropagation();">Détails</button>
-                </div>
-            `;
-            
-            // Add error handling for the image
-            const imgElement = movieCard.querySelector('img');
-            imgElement.onerror = function() {
-                this.src = defaultImageUrl;
-            };
-            
-            container.appendChild(movieCard);
-        });
+        // Get the corresponding "Voir plus" button for this container
+        const voirPlusButton = container.parentElement.querySelector('button');
+        
+        // Create and display initial movie cards
+        createMovieCards(movies.slice(0, initialMoviesToShow), container);
+        
+        // Set up the "Voir plus" button
+        if (voirPlusButton) {
+            if (movies.length > initialMoviesToShow && (isMobile || isTablet)) {
+                // Store remaining movies for later use
+                const remainingMovies = movies.slice(initialMoviesToShow);
+                let showingAll = false;
+                
+                // Add click handler to load more movies
+                voirPlusButton.onclick = function() {
+                    if (!showingAll) {
+                        // Add the remaining movies to the container
+                        createMovieCards(remainingMovies, container);
+                        
+                        // Update button text
+                        this.textContent = "Tout est affiché";
+                        this.classList.add("bg-gray-500");
+                        this.classList.remove("bg-red-600");
+                        showingAll = true;
+                    }
+                };
+                
+                // Make sure button is visible on mobile and tablet
+                voirPlusButton.style.display = "block";
+                voirPlusButton.textContent = "Voir plus";
+                voirPlusButton.classList.add("bg-red-600");
+                voirPlusButton.classList.remove("bg-gray-500");
+                
+                // Make sure it's visible on tablet
+                voirPlusButton.classList.remove("md:hidden");
+                // But hide on desktop
+                if (window.innerWidth >= 1024) {
+                    voirPlusButton.style.display = "none";
+                }
+            } else {
+                // If no more movies available, still show button but disabled
+                voirPlusButton.textContent = "Tout est affiché";
+                voirPlusButton.classList.add("bg-gray-500");
+                voirPlusButton.classList.remove("bg-red-600");
+                
+                // Make sure it's visible on tablet
+                voirPlusButton.classList.remove("md:hidden");
+                // But hide on desktop
+                if (window.innerWidth >= 1024) {
+                    voirPlusButton.style.display = "none";
+                } else {
+                    voirPlusButton.style.display = "block";
+                }
+            }
+        }
     } catch (error) {
-        console.error('Error displaying mystery movies:', error);
+        console.error('Error displaying movies:', error);
     }
 }
-
-
 
 // Call this function when the DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
@@ -350,6 +439,56 @@ document.addEventListener('DOMContentLoaded', function() {
             displayMoviesByGenre(selectedCategory, "selected-movies");
         });
     }
+    
+    // Add window resize handler to adjust movie display when screen size changes
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+        // Debounce resize event to prevent excessive rerendering
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(function() {
+            // Only reload if we cross a breakpoint boundary
+            const wasMobile = window.innerWidth < 768;
+            const wasTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+            const wasDesktop = window.innerWidth >= 1024;
+            
+            const isMobile = window.innerWidth < 768;
+            const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+            const isDesktop = window.innerWidth >= 1024;
+            
+            // If we crossed a breakpoint boundary, reload the movies
+            if ((wasMobile !== isMobile) || (wasTablet !== isTablet) || (wasDesktop !== isDesktop)) {
+                // Force buttons to be properly visible/hidden based on new screen size
+                if (isDesktop) {
+                    // Hide all Voir plus buttons on desktop
+                    document.querySelectorAll('section button').forEach(button => {
+                        button.style.display = 'none';
+                    });
+                } else {
+                    // Show Voir plus buttons on mobile and tablet
+                    document.querySelectorAll('section button').forEach(button => {
+                        button.style.display = 'block';
+                        // Reset button appearance if needed
+                        if (button.textContent === "Voir plus") {
+                            button.classList.add("bg-red-600");
+                            button.classList.remove("bg-gray-500");
+                        }
+                    });
+                }
+                
+                // Reload the movie sections
+                displayMostRatedMovies();
+                displayMoviesByGenre('Mystery', 'mystery-movies');
+                displayMoviesByGenre('Action', 'action-movies');
+                displayMoviesByGenre('Drama', 'drama-movies');
+                
+                // Reload the selected category
+                if (headerCategorySelect) {
+                    const selectedCategory = headerCategorySelect.value || 'Action';
+                    displayMoviesByGenre(selectedCategory, "selected-movies");
+                }
+            }
+        }, 250); // Wait 250ms after resize ends
+    });
 });
 
 
