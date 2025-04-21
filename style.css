@@ -1,0 +1,66 @@
+body {
+    font-family: 'Oswald', sans-serif;
+}
+.movie-card {
+    transition: transform 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+.movie-card:hover {
+    transform: scale(1.05);
+}
+.movie-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 8px;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+.movie-details-btn {
+    background: #333;
+    color: white;
+    border: none;
+    padding: 4px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    float: right;
+    font-size: 12px;
+}
+.movie-title {
+    font-weight: bold;
+    margin-right: 10px;
+    font-size: 14px;
+}
+
+/* Category selection styles */
+.categories-container {
+    border: 1px solid #ddd;
+    max-width: 300px;
+}
+.category-item {
+    padding: 8px 12px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+}
+.category-item:last-child {
+    border-bottom: none;
+}
+.category-checkbox {
+    margin-right: 10px;
+}
+.category-select {
+    border: 1px solid #ddd;
+    padding: 8px;
+    width: 100%;
+    margin-bottom: 16px;
+}
+.selected-category-title {
+    font-weight: bold;
+    margin: 16px 0;
+    font-size: 18px;
+}
