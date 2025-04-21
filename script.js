@@ -224,9 +224,14 @@ document.addEventListener('DOMContentLoaded', function() {
     displayMoviesByGenre('Mystery', 'mystery-movies');
     displayMoviesByGenre('Action', 'action-movies');
     displayMoviesByGenre('Drama', 'drama-movies');
+    
     // Add event listener for category changes
     const headerCategorySelect = document.getElementById('header-category-select');
     if (headerCategorySelect) {
+        // Get the initial selected value and load it
+        const initialCategory = headerCategorySelect.value || 'Action';
+        displayMoviesByGenre(initialCategory, "selected-movies");
+        
         headerCategorySelect.addEventListener('change', function() {
             const selectedCategory = this.value;
             console.log(selectedCategory);
