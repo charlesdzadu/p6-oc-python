@@ -3,6 +3,43 @@ const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
 
 
 
+function resetModal() {
+    document.querySelectorAll('.modal-title').forEach(element => {
+        element.textContent = 'Chargement des informations...';
+    });
+    document.querySelectorAll('.modal-directors').forEach(element => {
+        element.textContent = 'Chargement des informations...';
+    });
+    document.querySelectorAll('.modal-genres').forEach(element => {
+        element.textContent = 'Chargement des informations...';
+    });
+    document.querySelectorAll('.modal-duration').forEach(element => {
+        element.textContent = 'Chargement des informations...';
+    });
+    document.querySelectorAll('.modal-rating').forEach(element => {
+        element.textContent = 'Chargement des informations...';
+    });
+    document.querySelectorAll('.modal-budget').forEach(element => {
+        element.textContent = '';
+    });
+    document.querySelectorAll('.modal-synopsis').forEach(element => {
+        element.textContent = 'Chargement des informations...';
+    });
+    
+}
+
+
+function humanReadableNumber(number) {
+    if (number >= 1000000000) {
+        return (number / 1000000000).toFixed(1) + 'B';
+    } else if (number >= 1000000) {
+        return (number / 1000000).toFixed(1) + 'M';
+    } else if (number >= 1000) {
+        return (number / 1000).toFixed(1) + 'K';
+    } else {
+        return number.toLocaleString('fr-FR');
+    }
+}
 
 async function getMoviesByGenres(genreName) {
     var queryParams = new URLSearchParams();
@@ -28,6 +65,7 @@ async function openModal(movieId) {
     const defaultImageUrl = 'https://placehold.co/200x300/gray/white?text=No+Image';
     
     // If we have actual movie data, use it to populate more details
+    resetModal();
     if (movieData) {
         // Set poster image if available
         if (movieData.image_url) {
@@ -80,7 +118,7 @@ async function openModal(movieId) {
         if (movieData.worldwide_gross_income) {
             const budgetElements = document.querySelectorAll('.modal-budget');
             budgetElements.forEach(element => {
-                element.textContent = `Recettes au box-office: ${movieData.worldwide_gross_income} $`;
+                element.textContent = `Recettes au box-office: ${humanReadableNumber(movieData.worldwide_gross_income)} $`;
             });
         }
 
