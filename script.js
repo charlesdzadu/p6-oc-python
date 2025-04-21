@@ -61,21 +61,34 @@ async function openModal(movieId) {
         if (movieData.genres) {
             const genreElements = document.querySelectorAll('.modal-genres');
             genreElements.forEach(element => {
-                element.textContent = `${movieData.genres.join(', ')} (${movieData.countries || ''}, ${movieData.year || ''})`;
+                element.textContent = `${movieData.year || ''} - ${movieData.genres.join(', ')}`;
             });
         }
         
         if (movieData.duration) {
             const durationElements = document.querySelectorAll('.modal-duration');
             durationElements.forEach(element => {
-                element.textContent = `Durée: ${movieData.duration} minutes`;
+                element.textContent = `${movieData.rated} - ${movieData.duration} minutes (${movieData.countries.join(', ')})`;
             });
         }
+        if (movieData.imdb_score) {
+            const ratingElements = document.querySelectorAll('.modal-rating');
+            ratingElements.forEach(element => {
+                element.textContent = `IMDB Score: ${movieData.imdb_score} / 10`;
+            });
+        }
+        if (movieData.worldwide_gross_income) {
+            const budgetElements = document.querySelectorAll('.modal-budget');
+            budgetElements.forEach(element => {
+                element.textContent = `Recettes au box-office: ${movieData.worldwide_gross_income} $`;
+            });
+        }
+
         
-        if (movieData.description) {
+        if (movieData.long_description) {
             const synopsisElements = document.querySelectorAll('.modal-synopsis');
             synopsisElements.forEach(element => {
-                element.textContent = movieData.description;
+                element.textContent = movieData.long_description;
             });
         }
         
