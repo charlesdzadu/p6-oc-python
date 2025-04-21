@@ -36,31 +36,3 @@ body {
     font-size: 14px;
 }
 
-/* Category selection styles */
-.categories-container {
-    border: 1px solid #ddd;
-    max-width: 300px;
-}
-.category-item {
-    padding: 8px 12px;
-    border-bottom: 1px solid #ddd;
-    display: flex;
-    align-items: center;
-}
-.category-item:last-child {
-    border-bottom: none;
-}
-.category-checkbox {
-    margin-right: 10px;
-}
-.category-select {
-    border: 1px solid #ddd;
-    padding: 8px;
-    width: 100%;
-    margin-bottom: 16px;
-}
-.selected-category-title {
-    font-weight: bold;
-    margin: 16px 0;
-    font-size: 18px;
-}

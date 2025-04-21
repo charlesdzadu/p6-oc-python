@@ -20,10 +20,12 @@ async function getMovieById(id) {
 }
 
 async function openModal(movieId) {
-
     const movieData = await getMovieById(movieId);
     document.getElementById('modalTitle').textContent = movieData.title;
     document.getElementById('modalTitleMobile').textContent = movieData.title;
+    
+    // Default image for fallback
+    const defaultImageUrl = 'https://placehold.co/200x300/gray/white?text=No+Image';
     
     // If we have actual movie data, use it to populate more details
     if (movieData) {
@@ -32,6 +34,18 @@ async function openModal(movieId) {
             const posterElements = document.querySelectorAll('.modal-poster');
             posterElements.forEach(element => {
                 element.src = movieData.image_url;
+                element.alt = movieData.title;
+                
+                // Add error handling for the image
+                element.onerror = function() {
+                    this.src = defaultImageUrl;
+                };
+            });
+        } else {
+            // If no image URL is provided, set default image
+            const posterElements = document.querySelectorAll('.modal-poster');
+            posterElements.forEach(element => {
+                element.src = defaultImageUrl;
                 element.alt = movieData.title;
             });
         }
@@ -73,11 +87,31 @@ async function openModal(movieId) {
         }
     }
     
-    document.getElementById('movieModal').classList.remove('hidden');
+    // Get the modal element
+    const modal = document.getElementById('movieModal');
+    
+    // Show the modal with animation
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+    modal.classList.add('opacity-100');
+    
+    // Animate the modal content
+    const modalContent = modal.querySelector('div');
+    modalContent.classList.remove('scale-95');
+    modalContent.classList.add('scale-100');
 }
 
 function closeModal() {
-    document.getElementById('movieModal').classList.add('hidden');
+    // Get the modal element
+    const modal = document.getElementById('movieModal');
+    
+    // Hide the modal with animation
+    modal.classList.remove('opacity-100');
+    modal.classList.add('opacity-0', 'pointer-events-none');
+    
+    // Animate the modal content
+    const modalContent = modal.querySelector('div');
+    modalContent.classList.remove('scale-100');
+    modalContent.classList.add('scale-95');
 }
 
 function getBestMovie() {
@@ -91,10 +125,19 @@ function getBestMovie() {
             var bestMovie = data.results[0];
             bestMovie = await getMovieById(bestMovie.id);
             
+            // Set a default placeholder image
+            const defaultImageUrl = 'https://placehold.co/300x180/gray/white?text=No+Image';
+            
             // Update the Meilleur film section with the fetched data
             document.getElementById('best-movie-title').textContent = bestMovie.title;
-            document.getElementById('best-movie-image').src = bestMovie.image_url || 'https://placehold.co/300x180';
+            document.getElementById('best-movie-image').src = bestMovie.image_url || defaultImageUrl;
             document.getElementById('best-movie-image').alt = bestMovie.title;
+            
+            // Add error handling for the image
+            const imgElement = document.getElementById('best-movie-image');
+            imgElement.onerror = function() {
+                this.src = defaultImageUrl;
+            };
             
             // Format genre and year info
             const year = bestMovie.year || '';
@@ -103,8 +146,8 @@ function getBestMovie() {
                 `${genres} (${bestMovie.countries || ''}, ${year})`;
             
             // Update description if available
-            if (bestMovie.description) {
-                document.getElementById('best-movie-description').textContent = bestMovie.description;
+            if (bestMovie.long_description) {
+                document.getElementById('best-movie-description').textContent = bestMovie.long_description;
             }
             
             // Update the modal open button to use this movie's details
@@ -123,7 +166,7 @@ function getBestMovie() {
 async function getMostRatedMovies() {
     var queryParams = new URLSearchParams();
     queryParams.append('sort_by', '-imdb_score');
-    queryParams.append('limit', 10);
+    queryParams.append('page_size', 16);
     
     try {
         const response = await fetch(`${API_BASE_URL}/titles?${queryParams.toString()}`);
@@ -146,8 +189,11 @@ async function displayMostRatedMovies() {
         // Clear existing content
         container.innerHTML = '';
         
+        // Default image for fallback
+        const defaultImageUrl = 'https://placehold.co/150x100/gray/white?text=No+Image';
+        
         // Display movies (limit to 4 for desktop on initial load)
-        const moviesToShow = window.innerWidth >= 1024 ? 4 : (window.innerWidth >= 768 ? 2 : 1);
+        const moviesToShow = window.innerWidth >= 1024 ? 8 : (window.innerWidth >= 768 ? 2 : 1);
         
         // Create movie cards
         movies.slice(0, moviesToShow).forEach(movie => {
@@ -158,12 +204,18 @@ async function displayMostRatedMovies() {
             };
             
             movieCard.innerHTML = `
-                <img src="${movie.image_url || 'https://placehold.co/150x100'}" alt="${movie.title}" class="w-full h-40 md:h-48 lg:h-52 object-cover rounded-sm">
+                <img src="${movie.image_url || defaultImageUrl}" alt="${movie.title}" class="w-full h-40 md:h-48 lg:h-52 object-cover rounded-sm">
                 <div class="movie-overlay">
                     <span class="movie-title">${movie.title}</span>
                     <button class="movie-details-btn" onclick="openModal('${movie.id}'); event.stopPropagation();">Détails</button>
                 </div>
             `;
+            
+            // Add error handling for the image
+            const imgElement = movieCard.querySelector('img');
+            imgElement.onerror = function() {
+                this.src = defaultImageUrl;
+            };
             
             container.appendChild(movieCard);
         });
@@ -200,13 +252,22 @@ async function displayMoviesByGenre(genreName, containerId) {
                 await openModal(movie.id);
             };
             
+            // Set a default placeholder image
+            const defaultImageUrl = 'https://placehold.co/150x100/gray/white?text=No+Image';
+            
             movieCard.innerHTML = `
-                <img src="${movie.image_url || 'https://placehold.co/150x100'}" alt="${movie.title}" class="w-full h-40 md:h-48 lg:h-52 object-cover rounded-sm">
+                <img src="${movie.image_url || defaultImageUrl}" alt="${movie.title}" class="w-full h-40 md:h-48 lg:h-52 object-cover rounded-sm">
                 <div class="movie-overlay">
                     <span class="movie-title">${movie.title}</span>
                     <button class="movie-details-btn" onclick="openModal('${movie.id}'); event.stopPropagation();">Détails</button>
                 </div>
             `;
+            
+            // Add error handling for the image
+            const imgElement = movieCard.querySelector('img');
+            imgElement.onerror = function() {
+                this.src = defaultImageUrl;
+            };
             
             container.appendChild(movieCard);
         });
