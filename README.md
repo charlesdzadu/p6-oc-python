@@ -128,7 +128,24 @@ L'application s'adapte à différentes tailles d'écran :
 - Gestion des erreurs API avec des messages appropriés
 - Validation des données reçues de l'API
 
+### Validation du code 🔍
 
+#### Validation HTML
+Pour valider le code HTML :
+1. Visitez [W3C Markup Validator](https://validator.w3.org/#validate_by_input)
+2. Copiez le contenu du fichier `main.html`
+3. Collez-le dans la zone de texte sous "Validate by Direct Input"
+4. Cliquez sur "Check"
+
+#### Validation CSS
+Pour valider le code CSS :
+1. Visitez [W3C CSS Validator](https://jigsaw.w3.org/css-validator/#validate_by_input)
+2. Copiez le contenu du fichier `style.css`
+3. Collez-le dans la zone de texte
+4. Sélectionnez "CSS Level 3 + SVG" dans le menu déroulant Profile
+5. Cliquez sur "Check"
+
+Note : La validation CSS ne prend pas en compte les classes Tailwind car elles sont générées dynamiquement lors de l'exécution.
 
 ## Licence 📄
 
